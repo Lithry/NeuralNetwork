@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Tank : MonoBehaviour {
+	const float SpeedFactor = 10.0f;
 	private Transform trans;
 	private int heightLimit;
 	private int WidthLimit;
@@ -12,7 +13,6 @@ public class Tank : MonoBehaviour {
 	private float right;
 	private float left;
 	private float fitness;
-	private int inputs;
 	private Vector3 closestMine;
 	
 	void Start(){
@@ -23,7 +23,7 @@ public class Tank : MonoBehaviour {
 		brain = new NeuralNetwork(inputs, outputs, hiddenLayers, neuronsPerHidLayer, bias, sigmoidPending);
 	}
 
-	void Update () {
+	public void UpdateTank (float dt) {
 		//this will store all the inputs for the NN
 		List<float> inp = new List<float>();
 		
@@ -39,15 +39,7 @@ public class Tank : MonoBehaviour {
 		inp.Add(trans.forward.z);
 	
 		//update the brain and get the output from the network
-		List<float> outp = brain.Tink(inp);
-
-
-		//make sure there were no errors in calculating the
-		//output
-		if (outp.Count < inputs)
-		{
-			return;
-		}
+		List<float> outp = brain.Think(inp);
 		
 		//assign the outputs to the sweepers left & right tracks
 		right = outp[0];
@@ -69,14 +61,9 @@ public class Tank : MonoBehaviour {
 		lookAt.z = Mathf.Cos(rotation);
 
 		//update position
-		trans.position += (lookAt * speed);
-		
+		trans.position += (lookAt * speed * dt * SpeedFactor);
+		trans.forward = lookAt;
 		Limits();
-
-
-
-		//trans.Translate(Vector3.forward * Time.deltaTime * 5);
-
 	}
 
 	public void SetLimits(int h, int w){
@@ -129,7 +116,15 @@ public class Tank : MonoBehaviour {
 		brain.SetWeights(w);
 	}
 
+	public List<Chromosome> GetWeights(){
+		return brain.GetWeights();
+	}
+
 	public int GetNumberOfWeights(){
 		return brain.GetNumberOfWeights();
+	}
+
+	public void EvolveBrain(){
+
 	}
 }

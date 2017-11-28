@@ -46,13 +46,11 @@ public class NeuralNetwork {
 	}
 
 	public List<float> GetWeights(){
-		List<float> w = new List<float>();
+		List<Chromosome> w = new List<Chromosome>();
 
 		for (int i = 0; i < neuronlayers.Count; i++){
 			for (int j = 0; j < neuronlayers[i].neurons.Count; j++){
-				for (int k = 0; k < neuronlayers[i].neurons[j].weights.Count; k++){
-					w.Add(neuronlayers[i].neurons[j].weights[k]);
-				}
+				w.Add(neuronlayers[i].neurons[j].weights);
 			}
 		}
 
@@ -74,7 +72,7 @@ public class NeuralNetwork {
 		return 1 / (1 + Mathf.Pow(2.7183f, (-activation/response)));
 	}
 
-	public List<float> Tink(List<float> inputs){
+	public List<float> Think(List<float> inputs){
 		List<float> outputs = new List<float>();
 		
 		if (inputs.Count != numInputs){
@@ -83,8 +81,10 @@ public class NeuralNetwork {
 
 		for (int i = 0; i < neuronlayers.Count; i++){
 			if ( i > 0 ){
-				inputs = outputs;
+				inputs.Clear();
+				inputs.AddRange(outputs);
 			}
+
 			outputs.Clear();
 
 			for (int j = 0; j < neuronlayers[i].neurons.Count; j++){

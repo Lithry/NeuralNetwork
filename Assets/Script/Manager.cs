@@ -6,7 +6,7 @@ public class Manager : MonoBehaviour {
 	public static Manager instance;
 	public GameObject agent;
 	public int agentNum;
-	private List<GameObject> agents = new List<GameObject>();
+	private List<Tank> agents = new List<Tank>();
 	public GameObject mine;
 	public int mineNum;
 	private List<GameObject> mines = new List<GameObject>();
@@ -20,6 +20,8 @@ public class Manager : MonoBehaviour {
 	public float bias;
 	[Range(0.01f, 3.0f)]
 	public float sigmoidPending;
+	[Range(1, 50)]
+	public int iterations;
 
 	// Use this for initialization
 	void Awake () {
@@ -35,18 +37,31 @@ public class Manager : MonoBehaviour {
 			Tank tank = obj.GetComponent<Tank>();
 			tank.SetLimits(maxHeight, maxWidth);
 			tank.SetBrain(inputs, outputs, numHiddenLayers, numNeuronPerHiddenLayer, bias, sigmoidPending);
-			agents.Add(obj);
+			agents.Add(tank);
 		}
 	}
 	
 	// Update is called once per frame
 	void FixedUpdate () {
-		
+		for (int i = 0; i < iterations; i++){
+			for (int j = 0; j < agents.Count; j++){
+				agents[j].UpdateTank(Time.fixedDeltaTime);
+			}
+		}
 	}
 
 	public List<GameObject> GetMines(){
 		return mines;
 	}
+
+	private void Evolve(){
+		List<Chromosome> weights = new List<Chromosome>();
+		for (int i = 0; i < agents.Count; i++){
+			weights.Add(agents[i].GetWeights());
+		}
+	}
+
+	
 
 	void OnDrawGizmos(){
 		Gizmos.color = Color.red;
