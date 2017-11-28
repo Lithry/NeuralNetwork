@@ -16,7 +16,9 @@ public class Manager : MonoBehaviour {
 	public int outputs;
 	public int numHiddenLayers;
 	public int numNeuronPerHiddenLayer;
+	[Range(-1.0f, 1.0f)]
 	public float bias;
+	[Range(0.01f, 3.0f)]
 	public float sigmoidPending;
 
 	// Use this for initialization

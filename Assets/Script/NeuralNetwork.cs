@@ -22,33 +22,48 @@ public class NeuralNetwork {
 	}
 
 	public void CreateNetwork(){
-		//create the layers of the network
+		// Input Layer
+		neuronlayers.Add(new NeuronLayer(numInputs, numInputs));
+
+		// Create the Hidden Layers of the network
 		if (numHiddenLayers > 0){
-			
-			//create first hidden layer
+
+			// Create first Hidden Layer
 			neuronlayers.Add(new NeuronLayer(neuronsPerHiddenLayer, numInputs));
 			for (int i = 0; i < numHiddenLayers - 1; ++i){
+				// Create next Hidden Layer
 				neuronlayers.Add(new NeuronLayer(neuronsPerHiddenLayer, neuronsPerHiddenLayer));
 			}
 
-			//create output layer
+			// Create Output Layer
 			neuronlayers.Add(new NeuronLayer(numOutputs, neuronsPerHiddenLayer));
 		}
 		else{
-		
-		//create output layer
+			
+			// Create Output Layer
 			neuronlayers.Add(new NeuronLayer(numOutputs, numInputs));
 		}
 	}
 
 	public List<float> GetWeights(){
+		List<float> w = new List<float>();
 
-		return null;
+		for (int i = 0; i < neuronlayers.Count; i++){
+			for (int j = 0; j < neuronlayers[i].neurons.Count; j++){
+				for (int k = 0; k < neuronlayers[i].neurons[j].weights.Count; k++){
+					w.Add(neuronlayers[i].neurons[j].weights[k]);
+				}
+			}
+		}
+
+		return w;
 	}
 
 	public int GetNumberOfWeights(){
-
-		return 0;
+		if (numHiddenLayers > 0)
+			return ((numInputs + numOutputs) * (numInputs + 1)) + (neuronsPerHiddenLayer * (numInputs + 1) + (neuronsPerHiddenLayer * (neuronsPerHiddenLayer + 1)));
+		else
+			return ((numInputs + numOutputs) * (numInputs + 1));
 	}
 
 	public void SetWeights(List<float> weights){
@@ -56,48 +71,32 @@ public class NeuralNetwork {
 	}
 
 	public float Sigmoid(float activation, float response){
-
-		return 0;
+		return 1 / (1 + Mathf.Pow(2.7183f, (-activation/response)));
 	}
 
 	public List<float> Tink(List<float> inputs){
-		//stores the resultant outputs from each layer
 		List<float> outputs = new List<float>();
-		int cWeight = 0;
 		
-		//first check that we have the correct amount of inputs
 		if (inputs.Count != numInputs){
-			//just return an empty vector if incorrect.
 			return outputs;
 		}
-		
-		//For each layer...
-		for (int i = 0; i < numHiddenLayers + 1; ++i){
+
+		for (int i = 0; i < neuronlayers.Count; i++){
 			if ( i > 0 ){
 				inputs = outputs;
 			}
 			outputs.Clear();
-			cWeight = 0;
-			
-			//for each neuron sum the inputs * corresponding weights. Throw
-			//the total at the sigmoid function to get the output.
-			for (int j = 0; j < neuronlayers[i].neuronNumber; ++j){
-				float netinput = 0;
-				int NumInputs = neuronlayers[i].neurons[j].inputs;
-				//for each weight
-				for (int k = 0; k < NumInputs - 1; ++k)
-				{
-					//sum the weights x inputs
-					netinput += neuronlayers[i].neurons[j].weights[k] *	inputs[cWeight++];
-				}
-				//add in the bias
-				netinput += neuronlayers[i].neurons[j].weights[NumInputs - 1] * bias;
 
-				//we can store the outputs from each layer as we generate them.
-				//The combined activation is first filtered through the sigmoid
-				//function
+			for (int j = 0; j < neuronlayers[i].neurons.Count; j++){
+				
+				float netinput = 0;
+				for (int k = 0; k < neuronlayers[i].neurons[j].weights.Count - 1; ++k){
+					netinput += neuronlayers[i].neurons[j].weights[k] *	inputs[k];
+				}
+
+				netinput += neuronlayers[i].neurons[j].weights[neuronlayers[i].neurons[j].weights.Count - 1] * bias;
+
 				outputs.Add(Sigmoid(netinput, sigmoidPending));
-				cWeight = 0;
 			}
 		}
 		return outputs;
