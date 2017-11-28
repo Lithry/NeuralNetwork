@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Manager : MonoBehaviour {
+	public static Manager instance;
 	public GameObject agent;
 	public int agentNum;
 	private List<GameObject> agents = new List<GameObject>();
@@ -11,9 +12,16 @@ public class Manager : MonoBehaviour {
 	private List<GameObject> mines = new List<GameObject>();
 	public int maxHeight;
 	public int maxWidth;
+	public int inputs;
+	public int outputs;
+	public int numHiddenLayers;
+	public int numNeuronPerHiddenLayer;
+	public float bias;
+	public float sigmoidPending;
 
 	// Use this for initialization
 	void Awake () {
+		instance = this;
 		for (int i = 0; i < mineNum; i++){
 			GameObject obj = Instantiate(mine, new Vector3(Random.Range(1 - (float)maxWidth, (float)maxWidth) - 1, 0, Random.Range(1 - (float)maxHeight, (float)maxHeight - 1)), Quaternion.Euler(0, 0, 0));
 			obj.GetComponent<Mine>().SetLimits(maxHeight, maxWidth);
@@ -22,7 +30,9 @@ public class Manager : MonoBehaviour {
 		
 		for (int i = 0; i < agentNum; i++){
 			GameObject obj = Instantiate(agent, new Vector3(Random.Range(1 - (float)maxWidth, (float)maxWidth) - 1, 0, Random.Range(1 - (float)maxHeight, (float)maxHeight - 1)), Quaternion.Euler(0, Random.Range(0.0f, 360.0f), 0));
-			obj.GetComponent<Tank>().SetLimits(maxHeight, maxWidth);
+			Tank tank = obj.GetComponent<Tank>();
+			tank.SetLimits(maxHeight, maxWidth);
+			tank.SetBrain(inputs, outputs, numHiddenLayers, numNeuronPerHiddenLayer, bias, sigmoidPending);
 			agents.Add(obj);
 		}
 	}
@@ -30,6 +40,10 @@ public class Manager : MonoBehaviour {
 	// Update is called once per frame
 	void FixedUpdate () {
 		
+	}
+
+	public List<GameObject> GetMines(){
+		return mines;
 	}
 
 	void OnDrawGizmos(){
