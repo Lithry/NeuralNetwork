@@ -46,11 +46,14 @@ public class NeuralNetwork {
 	}
 
 	public List<float> GetWeights(){
-		List<Chromosome> w = new List<Chromosome>();
+		List<float> w = new List<float>();
 
 		for (int i = 0; i < neuronlayers.Count; i++){
 			for (int j = 0; j < neuronlayers[i].neurons.Count; j++){
-				w.Add(neuronlayers[i].neurons[j].weights);
+				for (int k = 0; k < neuronlayers[i].neurons[j].weights.Count; k++)
+				{
+					w.Add(neuronlayers[i].neurons[j].weights[k]);
+				}
 			}
 		}
 
@@ -58,14 +61,25 @@ public class NeuralNetwork {
 	}
 
 	public int GetNumberOfWeights(){
-		if (numHiddenLayers > 0)
-			return ((numInputs + numOutputs) * (numInputs + 1)) + (neuronsPerHiddenLayer * (numInputs + 1) + (neuronsPerHiddenLayer * (neuronsPerHiddenLayer + 1)));
-		else
-			return ((numInputs + numOutputs) * (numInputs + 1));
+		int w = 0;
+		int inp = numInputs;
+		
+		for (int i = 0; i < neuronlayers.Count; i++)
+		{
+			w += (inp + 1) * neuronlayers[i].neurons.Count;
+			inp = neuronlayers[i].neurons.Count;
+		}
+		
+		return w;
 	}
 
 	public void SetWeights(List<float> weights){
-	
+		int index = 0;
+		for (int i = 0; i < neuronlayers.Count; i++){
+			for (int j = 0; j < neuronlayers[i].neurons.Count; j++){
+				neuronlayers[i].neurons[j].weights[j] = weights[index++];
+			}
+		}
 	}
 
 	public float Sigmoid(float activation, float response){

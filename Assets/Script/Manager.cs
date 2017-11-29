@@ -10,6 +10,9 @@ public class Manager : MonoBehaviour {
 	public GameObject mine;
 	public int mineNum;
 	private List<GameObject> mines = new List<GameObject>();
+	public int elitesNum;
+	[Range(0.00f, 1.00f)]
+	public float mutation;
 	public int maxHeight;
 	public int maxWidth;
 	public int inputs;
@@ -22,6 +25,9 @@ public class Manager : MonoBehaviour {
 	public float sigmoidPending;
 	[Range(1, 50)]
 	public int iterations;
+	public int durationOfGeneration;
+	private float timer;
+	private GeneticAlg ga;
 
 	// Use this for initialization
 	void Awake () {
@@ -37,6 +43,8 @@ public class Manager : MonoBehaviour {
 			Tank tank = obj.GetComponent<Tank>();
 			tank.SetLimits(maxHeight, maxWidth);
 			tank.SetBrain(inputs, outputs, numHiddenLayers, numNeuronPerHiddenLayer, bias, sigmoidPending);
+			if (i == 0)
+				ga = new GeneticAlg(elitesNum, agentNum, tank.GetNumberOfWeights(), mutation);
 			agents.Add(tank);
 		}
 	}
@@ -48,6 +56,10 @@ public class Manager : MonoBehaviour {
 				agents[j].UpdateTank(Time.fixedDeltaTime);
 			}
 		}
+
+		timer += Time.fixedDeltaTime;
+		if (timer > durationOfGeneration)
+			Evolve();
 	}
 
 	public List<GameObject> GetMines(){
@@ -57,7 +69,16 @@ public class Manager : MonoBehaviour {
 	private void Evolve(){
 		List<Chromosome> weights = new List<Chromosome>();
 		for (int i = 0; i < agents.Count; i++){
-			weights.Add(agents[i].GetWeights());
+			Chromosome c = weights[i];
+			c.fitness = agents[i].GetFitness();
+			c.weights = agents[i].GetWeights();
+			weights[i] = c;
+		}
+		weights = ga.Evolv(weights);
+
+		for (int i = 0; i < agents.Count; i++)
+		{
+			agents[i].SetWeights(weights[i].weights);
 		}
 	}
 

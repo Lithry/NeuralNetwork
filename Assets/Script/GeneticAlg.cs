@@ -23,12 +23,12 @@ public class GeneticAlg {
 			float nGen1 = Random.Range(dad.weights[i], mom.weights[i]);
 			float nGen2 = Random.Range(mom.weights[i], dad.weights[i]);
 			if (i % 2 == 0){
-				nChro1.AddGen(nGen1);
-				nChro2.AddGen(nGen2);
+				nChro1.weights.Add(nGen1);
+				nChro2.weights.Add(nGen2);
 			}
 			else{
-				nChro1.AddGen(nGen2);
-				nChro2.AddGen(nGen1);
+				nChro1.weights.Add(nGen2);
+				nChro2.weights.Add(nGen1);
 			}
 			
 		}
@@ -50,7 +50,7 @@ public class GeneticAlg {
 			if (points >= rnd)
 				return pop[i];
 		}
-		return null;
+		return pop[0];
 	}
 
 	public List<Chromosome> Mutation(List<Chromosome> population){

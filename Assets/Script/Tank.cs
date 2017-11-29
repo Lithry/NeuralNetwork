@@ -116,7 +116,7 @@ public class Tank : MonoBehaviour {
 		brain.SetWeights(w);
 	}
 
-	public List<Chromosome> GetWeights(){
+	public List<float> GetWeights(){
 		return brain.GetWeights();
 	}
 
