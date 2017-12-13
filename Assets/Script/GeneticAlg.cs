@@ -17,18 +17,20 @@ public class GeneticAlg {
 
 	public void Crossour(Chromosome dad, Chromosome mom, out Chromosome child1, out Chromosome child2){
 		Chromosome nChro1 = new Chromosome();
+		nChro1.weights = new List<float>();
 		Chromosome nChro2 = new Chromosome();
+		nChro2.weights = new List<float>();
+		int rnd = Random.Range(0, gens);
+		
 		for (int i = 0; i < gens; i++)
 		{
-			float nGen1 = Random.Range(dad.weights[i], mom.weights[i]);
-			float nGen2 = Random.Range(mom.weights[i], dad.weights[i]);
-			if (i % 2 == 0){
-				nChro1.weights.Add(nGen1);
-				nChro2.weights.Add(nGen2);
+			if (i < rnd){
+				nChro1.weights.Add(dad.weights[i]);
+				nChro2.weights.Add(mom.weights[i]);
 			}
 			else{
-				nChro1.weights.Add(nGen2);
-				nChro2.weights.Add(nGen1);
+				nChro1.weights.Add(mom.weights[i]);
+				nChro2.weights.Add(dad.weights[i]);
 			}
 			
 		}

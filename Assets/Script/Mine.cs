@@ -7,14 +7,8 @@ public class Mine : MonoBehaviour {
 	private int heightLimit;
 	private int WidthLimit;
 
-	// Use this for initialization
-	void Start () {
+	void Awake () {
 		trans = transform;
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
 	}
 
 	public void SetLimits(int h, int w){
@@ -23,7 +17,9 @@ public class Mine : MonoBehaviour {
 	}
 
 	void OnTriggerEnter(Collider collider){
-		
-		trans.position = new Vector3(Random.Range(1 - (float)WidthLimit, (float)WidthLimit - 1), 0, Random.Range(1 - (float)heightLimit, (float)heightLimit - 1));
+		if (collider.tag == "Tank"){
+			trans.position = new Vector3(Random.Range(1 - (float)WidthLimit, (float)WidthLimit - 1), 0, Random.Range(1 - (float)heightLimit, (float)heightLimit - 1));
+			collider.gameObject.GetComponent<Tank>().IncrementFitness(100.0f);
+		}
 	}
 }

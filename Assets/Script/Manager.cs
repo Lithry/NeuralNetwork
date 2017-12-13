@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Manager : MonoBehaviour {
 	public static Manager instance;
@@ -28,10 +29,14 @@ public class Manager : MonoBehaviour {
 	public int durationOfGeneration;
 	private float timer;
 	private GeneticAlg ga;
+	private int generation;
+	public Text generationText;
+	public Text timerText;
 
 	// Use this for initialization
 	void Awake () {
 		instance = this;
+		generation = 1;
 		for (int i = 0; i < mineNum; i++){
 			GameObject obj = Instantiate(mine, new Vector3(Random.Range(1 - (float)maxWidth, (float)maxWidth) - 1, 0, Random.Range(1 - (float)maxHeight, (float)maxHeight - 1)), Quaternion.Euler(0, 0, 0));
 			obj.GetComponent<Mine>().SetLimits(maxHeight, maxWidth);
@@ -49,15 +54,15 @@ public class Manager : MonoBehaviour {
 		}
 	}
 	
-	// Update is called once per frame
 	void FixedUpdate () {
+		generationText.text = "Generation: " + generation.ToString();
+		timerText.text = "Time: " + timer.ToString("F2");
 		for (int i = 0; i < iterations; i++){
 			for (int j = 0; j < agents.Count; j++){
 				agents[j].UpdateTank(Time.fixedDeltaTime);
 			}
+			timer += Time.fixedDeltaTime;
 		}
-
-		timer += Time.fixedDeltaTime;
 		if (timer > durationOfGeneration)
 			Evolve();
 	}
@@ -67,19 +72,32 @@ public class Manager : MonoBehaviour {
 	}
 
 	private void Evolve(){
-		List<Chromosome> weights = new List<Chromosome>();
+		float maxFitness = agents[0].GetFitness();
+		List<Chromosome> chromList = new List<Chromosome>();
 		for (int i = 0; i < agents.Count; i++){
-			Chromosome c = weights[i];
+			Chromosome c = new Chromosome();
 			c.fitness = agents[i].GetFitness();
+			if (maxFitness < c.fitness)
+				maxFitness = c.fitness;
 			c.weights = agents[i].GetWeights();
-			weights[i] = c;
+			chromList.Add(c);
 		}
-		weights = ga.Evolv(weights);
+		Debug.Log("Gen " + generation.ToString() + " max Fitness: " + maxFitness.ToString("F0"));
+		chromList = ga.Evolv(chromList);
 
 		for (int i = 0; i < agents.Count; i++)
 		{
-			agents[i].SetWeights(weights[i].weights);
+			agents[i].SetWeights(chromList[i].weights);
 		}
+
+		for (int i = 0; i < agents.Count; i++)
+		{
+			agents[i].transform.position = new Vector3(Random.Range(1 - (float)maxWidth, (float)maxWidth) - 1, 0, Random.Range(1 - (float)maxHeight, (float)maxHeight - 1));
+			agents[i].transform.rotation = Quaternion.Euler(0, Random.Range(0.0f, 360.0f), 0);
+		}
+
+		timer = 0.0f;
+		generation++;
 	}
 
 	

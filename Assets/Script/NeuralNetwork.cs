@@ -64,12 +64,14 @@ public class NeuralNetwork {
 		int w = 0;
 		int inp = numInputs;
 		
-		for (int i = 0; i < neuronlayers.Count; i++)
-		{
-			w += (inp + 1) * neuronlayers[i].neurons.Count;
-			inp = neuronlayers[i].neurons.Count;
+		for (int i = 0; i < neuronlayers.Count; i++){
+			for (int j = 0; j < neuronlayers[i].neurons.Count; j++){
+				for (int k = 0; k < neuronlayers[i].neurons[j].weights.Count; k++){
+					w++;
+				}
+			}
 		}
-		
+
 		return w;
 	}
 
@@ -77,7 +79,10 @@ public class NeuralNetwork {
 		int index = 0;
 		for (int i = 0; i < neuronlayers.Count; i++){
 			for (int j = 0; j < neuronlayers[i].neurons.Count; j++){
-				neuronlayers[i].neurons[j].weights[j] = weights[index++];
+				for (int k = 0; k < neuronlayers[i].neurons[j].weights.Count; k++)
+				{
+					neuronlayers[i].neurons[j].weights[k] = weights[index++];
+				}
 			}
 		}
 	}

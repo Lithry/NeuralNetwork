@@ -12,7 +12,7 @@ public class Tank : MonoBehaviour {
 	private float speed;
 	private float right;
 	private float left;
-	private float fitness;
+	public float fitness;
 	private Vector3 closestMine;
 	
 	void Start(){
@@ -114,6 +114,7 @@ public class Tank : MonoBehaviour {
 
 	public void SetWeights(List<float> w){
 		brain.SetWeights(w);
+		fitness = 0;
 	}
 
 	public List<float> GetWeights(){
@@ -127,4 +128,8 @@ public class Tank : MonoBehaviour {
 	public void EvolveBrain(){
 
 	}
+
+	/*void OnTriggerEnter(Collider collider){
+		IncrementFitness(10);
+	}*/
 }
