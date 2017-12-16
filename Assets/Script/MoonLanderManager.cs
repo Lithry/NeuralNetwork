@@ -30,20 +30,23 @@ public class MoonLanderManager : MonoBehaviour {
 	public Text timerText;
 	[Range(1, 15)]
 	public int iterations;
+    private Vector3 landerBeginPos;
 	
 	void Awake () {
 		instance = this;
 		generation = 1;
 		timer = 0.0f;
+
+        landerBeginPos = new Vector3(5, 0, 13);
 		for (int i = 0; i < lunarsNum; i++){
-			GameObject obj = Instantiate(landerPrefab, new Vector3(Random.Range(-30, 30), 0, Random.Range(-20, 20)), Quaternion.Euler(90, 0, 0));
+            GameObject obj = Instantiate(landerPrefab, landerBeginPos, Quaternion.Euler(90, 0, 0));
 			Lander lan = obj.GetComponent<Lander>();
 			lan.SetBrain(inputs, outputs, numHiddenLayers, numNeuronPerHiddenLayer, bias, sigmoidPending);
 			if (i == 0)
 				ga = new GeneticAlg(elitesNum, lunarsNum, lan.GetNumberOfWeights(), mutation);
 			landers.Add(lan);
 		}
-		plataform = Instantiate(plataformPrefab, new Vector3(Random.Range(-30, 30), 0, Random.Range(-18, 0)), Quaternion.Euler(90, 0, 0));
+		plataform = Instantiate(plataformPrefab, new Vector3(-20, 0, -10), Quaternion.Euler(90, 0, 0));
 	}
 	
 	// Update is called once per frame
@@ -82,14 +85,14 @@ public class MoonLanderManager : MonoBehaviour {
 		{
 			landers[i].SetWeights(chromList[i].weights);
 		}
-
+        
 		for (int i = 0; i < landers.Count; i++)
 		{
-			landers[i].transform.position = new Vector3(Random.Range(-30, 30), 0, Random.Range(-20, 20));
+            landers[i].transform.position = landerBeginPos;
 			landers[i].transform.rotation = Quaternion.Euler(90, 0, 0);
 		}
 
-		plataform.transform.position = new Vector3(Random.Range(-30, 30), 0, Random.Range(-18, 0));
+        //plataform.transform.position = new Vector3(Random.Range(-25, 25), 0, -15);
 
 		timer = 0.0f;
 		generation++;

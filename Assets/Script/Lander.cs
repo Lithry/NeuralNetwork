@@ -5,38 +5,41 @@ using UnityEngine;
 public class Lander : MonoBehaviour {
 	private Transform trans;
 	private NeuralNetwork brain;
-	private Vector3 plataform;
+	private Vector3 plataformDir;
+    private Vector3 plataformPos;
 	private float right;
+    private Vector3 vecRight;
 	private float left;
-	private float forward;
-	private float back;
+    private Vector3 vecLeft;
 	private float up;
+    private Vector3 vecUp;
 	private float down;
+    private Vector3 vecDown;
 	private float speed;
 	public float fitness;
-	private Vector3 lastPosition;
-	private float distX;
-	private float lastDistX;
-	private float distZ;
-	private float lastDistZ;
 
 	void Start () {
 		trans = transform;
+        vecRight = new Vector3(-1, 0, 0);
+        vecLeft = new Vector3(1, 0, 0);
+        vecUp = new Vector3(0, 0, 1);
+        vecDown = new Vector3(0, 0, -1);
 	}
 
 	public void SetBrain(int inputs, int outputs, int hiddenLayers, int neuronsPerHidLayer, float bias, float sigmoidPending){
 		brain = new NeuralNetwork(inputs, outputs, hiddenLayers, neuronsPerHidLayer, bias, sigmoidPending);
 	}
 	
-	// Update is called once per frame
 	public void UpdateLander (float dt) {
 		List<float> inp = new List<float>();
 		
-		plataform = GetPlataform();
+		plataformDir = GetPlataformDir();
+        plataformPos = GetPlataformPos();
 
-		inp.Add(plataform.x);
-		inp.Add(plataform.y);
-		inp.Add(plataform.z);
+		inp.Add(plataformDir.x);
+		inp.Add(plataformDir.z);
+        inp.Add(plataformPos.x);
+        inp.Add(plataformPos.z);
 
 		List<float> outp = brain.Think(inp);
 		
@@ -45,30 +48,25 @@ public class Lander : MonoBehaviour {
 		up = outp[2];
 		down = outp[3];
 
-		//calculate steering forces
-		float movForce = ((right - left) + (up - down)) * 2;
-		Vector3 dir = new Vector3(right + left, 0, forward + back);
+        Vector3 dir = (vecRight * right) + (vecLeft * left) + (vecUp * up) + (vecDown * down);
 
-		//update position
-		lastPosition = trans.position;
+		float movForce = ((right - left) + (up - down)) * 5;
+
 		trans.position += (dir * dt * movForce);
 
-		distX = Mathf.Abs(trans.position.x - plataform.x);
-		distZ = Mathf.Abs(trans.position.z - plataform.z);
-
-		if (distX < lastDistX && distZ < lastDistZ){
-			IncrementFitness(10);
-		}
-
-		lastDistX = distX;
-		lastDistZ = distZ;
+        IncrementFitness(100 / Vector3.Distance(trans.position, plataformPos));
 	}
 
-	private Vector3 GetPlataform(){
+	private Vector3 GetPlataformDir(){
 		GameObject plataform = MoonLanderManager.instance.GetPlataform();
 		Vector3 dir = plataform.transform.position - trans.position;
 		return dir.normalized;
 	}
+    
+    private Vector3 GetPlataformPos(){
+        GameObject plataform = MoonLanderManager.instance.GetPlataform();
+        return plataform.transform.position;
+    }
 
 	public int GetNumberOfWeights(){
 		return brain.GetNumberOfWeights();
@@ -90,4 +88,16 @@ public class Lander : MonoBehaviour {
 	public void IncrementFitness(float val){
 		fitness += val;
 	}
+
+    void OnCollisionEnter(Collision coll){
+        if (coll.transform.tag == "Plataform"){
+            IncrementFitness(500);
+        }
+    }
+
+    void OnCollisionStay(Collision coll){
+        if (coll.transform.tag == "Plataform"){
+            IncrementFitness(500);
+        }
+    }
 }
