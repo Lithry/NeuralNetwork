@@ -6,24 +6,26 @@ public class Lander : MonoBehaviour {
 	private Transform trans;
 	private NeuralNetwork brain;
 	private Vector3 plataformDir;
-    private Vector3 plataformPos;
+	private Vector3 lastDir;
 	private float right;
-    private Vector3 vecRight;
 	private float left;
-    private Vector3 vecLeft;
 	private float up;
-    private Vector3 vecUp;
-	private float down;
-    private Vector3 vecDown;
 	private float speed;
 	public float fitness;
+	private bool onPlataform;
+	private float distX;
+	private float lastDistX;
+	private float distZ;
+	private float lastDistZ;
+	private float dist;
+	private float lastDist;
+	private int heightLimit;
+	private int WidthLimit;
 
 	void Start () {
+		onPlataform = false;
 		trans = transform;
-        vecRight = new Vector3(-1, 0, 0);
-        vecLeft = new Vector3(1, 0, 0);
-        vecUp = new Vector3(0, 0, 1);
-        vecDown = new Vector3(0, 0, -1);
+		lastDir = Vector3.zero;
 	}
 
 	public void SetBrain(int inputs, int outputs, int hiddenLayers, int neuronsPerHidLayer, float bias, float sigmoidPending){
@@ -31,30 +33,45 @@ public class Lander : MonoBehaviour {
 	}
 	
 	public void UpdateLander (float dt) {
-		List<float> inp = new List<float>();
+		if (!onPlataform){
+			List<float> inp = new List<float>();
+
+			plataformDir = GetPlataformDir();
+
+			inp.Add(plataformDir.x);
+			inp.Add(plataformDir.z);
+			inp.Add(lastDir.x);
+			inp.Add(lastDir.z);
+
+			List<float> outp = brain.Think(inp);
+
+			up = outp[0];
+			right = outp[1];
+			left = outp[2];
+
+        	Vector3 dir = (trans.right * right) + (-trans.right * left) + (trans.up * up);
+			lastDir = dir.normalized;
+
+			float movForce = (((Mathf.Abs(right - left)) * 2) + up) * 5;
+
+			trans.position += (dir * dt * movForce);
+			trans.position += (-trans.up * 2 * dt);
+		}
 		
-		plataformDir = GetPlataformDir();
-        plataformPos = GetPlataformPos();
+		Fitness();
+		Limits();
+	}
 
-		inp.Add(plataformDir.x);
-		inp.Add(plataformDir.z);
-        inp.Add(plataformPos.x);
-        inp.Add(plataformPos.z);
+	private void Fitness(){
+		dist = Vector3.Distance(trans.position, GetPlataformPos());
 
-		List<float> outp = brain.Think(inp);
-		
-		right = outp[0];
-		left = outp[1];
-		up = outp[2];
-		down = outp[3];
+		if (dist < lastDist){
+			IncrementFitness(100 / Vector3.Distance(trans.position, GetPlataformPos()));
+		}
+		lastDist = dist;
 
-        Vector3 dir = (vecRight * right) + (vecLeft * left) + (vecUp * up) + (vecDown * down);
-
-		float movForce = ((right - left) + (up - down)) * 5;
-
-		trans.position += (dir * dt * movForce);
-
-        IncrementFitness(100 / Vector3.Distance(trans.position, plataformPos));
+		if (onPlataform)
+			IncrementFitness(10000);
 	}
 
 	private Vector3 GetPlataformDir(){
@@ -79,6 +96,8 @@ public class Lander : MonoBehaviour {
 	public void SetWeights(List<float> w){
 		brain.SetWeights(w);
 		fitness = 0;
+		onPlataform = false;
+		dist = Vector3.Distance(trans.position, GetPlataformPos());
 	}
 
 	public List<float> GetWeights(){
@@ -89,15 +108,23 @@ public class Lander : MonoBehaviour {
 		fitness += val;
 	}
 
-    void OnCollisionEnter(Collision coll){
-        if (coll.transform.tag == "Plataform"){
-            IncrementFitness(500);
-        }
-    }
+	public void SetLimits(int h, int w){
+		heightLimit = h;
+		WidthLimit = w;
+	}
 
-    void OnCollisionStay(Collision coll){
-        if (coll.transform.tag == "Plataform"){
-            IncrementFitness(500);
-        }
-    }
+	private void Limits(){
+		if (trans.position.z < -heightLimit){
+			Vector3 newPos = new Vector3(trans.position.x, trans.position.y, heightLimit);
+			trans.position = newPos;
+		}
+		else if (trans.position.z > heightLimit){
+			Vector3 newPos = new Vector3(trans.position.x, trans.position.y, -WidthLimit);
+			trans.position = newPos;
+		}
+	}
+	
+	void OnTriggerEnter(Collider coll){
+		onPlataform = true;
+	}
 }
