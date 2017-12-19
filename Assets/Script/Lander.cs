@@ -50,6 +50,9 @@ public class Lander : MonoBehaviour {
 			left = outp[2];
 
         	Vector3 dir = (trans.right * right) + (-trans.right * left) + (trans.up * up);
+			Debug.DrawRay(trans.position, plataformDir, Color.red);
+			Debug.DrawRay(trans.position, lastDir, Color.magenta);
+			Debug.DrawRay(trans.position, dir, Color.green);
 			lastDir = dir.normalized;
 
 			float movForce = (((Mathf.Abs(right - left)) * 2) + up) * 5;
@@ -64,12 +67,21 @@ public class Lander : MonoBehaviour {
 
 	private void Fitness(){
 		dist = Vector3.Distance(trans.position, GetPlataformPos());
-
+		Vector3 dif = GetPlataformPos() - trans.position;
+		distX = Mathf.Abs(dif.x);
+		distZ = Mathf.Abs(dif.z);
 		if (dist < lastDist){
 			IncrementFitness(100 / Vector3.Distance(trans.position, GetPlataformPos()));
+			if (distX < lastDistX)
+				IncrementFitness(70 / Vector3.Distance(trans.position, GetPlataformPos()));
+			
+			if (distZ < lastDistZ)
+				IncrementFitness(40 / Vector3.Distance(trans.position, GetPlataformPos()));
 		}
 		lastDist = dist;
-
+		lastDistX = distX;
+		lastDistZ = distZ;
+		
 		if (onPlataform)
 			IncrementFitness(10000);
 	}
@@ -119,7 +131,7 @@ public class Lander : MonoBehaviour {
 			trans.position = newPos;
 		}
 		else if (trans.position.z > heightLimit){
-			Vector3 newPos = new Vector3(trans.position.x, trans.position.y, -WidthLimit);
+			Vector3 newPos = new Vector3(trans.position.x, trans.position.y, -heightLimit);
 			trans.position = newPos;
 		}
 	}
