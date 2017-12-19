@@ -62,7 +62,7 @@ public class Lander : MonoBehaviour {
 		}
 		
 		Fitness();
-		Limits();
+		//Limits();
 	}
 
 	private void Fitness(){
@@ -81,9 +81,6 @@ public class Lander : MonoBehaviour {
 		lastDist = dist;
 		lastDistX = distX;
 		lastDistZ = distZ;
-		
-		if (onPlataform)
-			IncrementFitness(10000);
 	}
 
 	private Vector3 GetPlataformDir(){
@@ -137,6 +134,12 @@ public class Lander : MonoBehaviour {
 	}
 	
 	void OnTriggerEnter(Collider coll){
-		onPlataform = true;
+		if (coll.tag == "Plataform")
+			onPlataform = true;
+	}
+	
+	void OnTriggerStay(Collider coll){
+		if (coll.tag == "PlataformInside" && onPlataform)
+			IncrementFitness(10000);
 	}
 }

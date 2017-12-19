@@ -7,6 +7,7 @@ public class MoonLanderManager : MonoBehaviour {
 	public static MoonLanderManager instance;
 	private GeneticAlg ga;
 	private List<Lander> landers = new List<Lander>();
+	private Vector3 landerPos;
 	public GameObject landerPrefab;
 	public GameObject plataformPrefab;
 	private GameObject plataform;
@@ -38,8 +39,9 @@ public class MoonLanderManager : MonoBehaviour {
 		generation = 1;
 		timer = 0.0f;
 
+		landerPos = new Vector3(Random.Range(-16, 17), 0, Random.Range(10, 16));
 		for (int i = 0; i < lunarsNum; i++){
-            GameObject obj = Instantiate(landerPrefab, new Vector3(Random.Range(-16, 17), 0, Random.Range(-15, 16)), Quaternion.Euler(90, 0, 0));
+            GameObject obj = Instantiate(landerPrefab, landerPos, Quaternion.Euler(90, 0, 0));
 			Lander lan = obj.GetComponent<Lander>();
 			lan.SetBrain(inputs, outputs, numHiddenLayers, numNeuronPerHiddenLayer, bias, sigmoidPending);
 			lan.SetLimits(maxHeight, maxWidth);
@@ -47,7 +49,7 @@ public class MoonLanderManager : MonoBehaviour {
 				ga = new GeneticAlg(elitesNum, lunarsNum, lan.GetNumberOfWeights(), mutation);
 			landers.Add(lan);
 		}
-		plataform = Instantiate(plataformPrefab, new Vector3(Random.Range(-20, 21), 0, Random.Range(-12, 13)), Quaternion.Euler(90, 0, 0));
+		plataform = Instantiate(plataformPrefab, new Vector3(Random.Range(-17, 18), 0, Random.Range(-15, -9)), Quaternion.Euler(90, 0, 0));
 	}
 	
 	void FixedUpdate () {
@@ -82,9 +84,10 @@ public class MoonLanderManager : MonoBehaviour {
 		Debug.Log("Gen " + generation.ToString() + " max Fitness: " + maxFitness.ToString("F0"));
 		chromList = ga.Evolv(chromList);
 
+		landerPos = new Vector3(Random.Range(-16, 17), 0, Random.Range(10, 16));
 		for (int i = 0; i < landers.Count; i++)
 		{
-            landers[i].transform.position = new Vector3(Random.Range(-16, 17), 0, Random.Range(-15, 16));
+            landers[i].transform.position = landerPos;
 		}
 		
 		for (int i = 0; i < landers.Count; i++)
@@ -92,7 +95,7 @@ public class MoonLanderManager : MonoBehaviour {
 			landers[i].SetWeights(chromList[i].weights);
 		}
 		
-		plataform.transform.position = new Vector3(Random.Range(-20, 21), 0, Random.Range(-12, 13));
+		plataform.transform.position = new Vector3(Random.Range(-17, 18), 0, Random.Range(-15, -9));
 
 		timer = 0.0f;
 		generation++;
