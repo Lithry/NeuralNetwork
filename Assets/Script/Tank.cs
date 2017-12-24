@@ -86,7 +86,7 @@ public class Tank : MonoBehaviour {
 			trans.position = newPos;
 		}
 		else if (trans.position.z > heightLimit){
-			Vector3 newPos = new Vector3(trans.position.x, trans.position.y, -WidthLimit);
+			Vector3 newPos = new Vector3(trans.position.x, trans.position.y, -heightLimit);
 			trans.position = newPos;
 		}
 	}
